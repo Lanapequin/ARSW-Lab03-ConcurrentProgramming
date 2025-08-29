@@ -19,8 +19,8 @@ El mayor consumo que se evidencio fue un 30.6% en CPU, con un consumo promedio d
 ![img_4.png](img%2Fimg_4.png)
 ![img_5.png](img%2Fimg_5.png)
 Consumo promedio de 0.7% en CPU y el maximo fue de 1.8%, el heap size en memoria es de 260 MB y el pico fue de 17 MB
-4. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
-
+3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
+En el punto anterior, se implemento offer y take, lo cuales con metodos que permiten agregar y eliminar elementos de una cola, sin incurrir en problemas de rango y manejo de hilos sincronizado.
 
 ##### Parte II. – Antes de terminar la clase.
 

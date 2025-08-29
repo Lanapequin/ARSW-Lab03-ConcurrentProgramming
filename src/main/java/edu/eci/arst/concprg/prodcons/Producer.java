@@ -37,6 +37,6 @@ public class Producer extends Thread {
             dataSeed = dataSeed + rand.nextInt(100);
             logger.log(Level.INFO, "Producer added {0}", dataSeed);
             queue.offer(dataSeed);
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 0, 500, TimeUnit.MILLISECONDS);
     }
 }

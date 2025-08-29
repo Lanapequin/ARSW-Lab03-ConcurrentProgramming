@@ -5,7 +5,10 @@
  */
 package edu.eci.arst.concprg.prodcons;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +29,9 @@ public class Consumer extends Thread{
     
     @Override
     public void run() {
-        while (true) {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        scheduler.scheduleAtFixedRate(() -> {
             int elem = 0;
             try {
                 elem = queue.take();
@@ -35,6 +40,6 @@ public class Consumer extends Thread{
                 Thread.currentThread().interrupt();
             }
             logger.log(Level.INFO, "Consumer consumes {0}", elem);
-        }
+        }, 0, 2, TimeUnit.SECONDS);
     }
 }
