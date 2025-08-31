@@ -34,17 +34,17 @@ public class Immortal extends Thread {
         scheduler.scheduleAtFixedRate(() -> {
             isPaused();
 
-            int myIndex = immortalsPopulation.indexOf(this);
-            int nextFighterIndex = r.nextInt(immortalsPopulation.size());
+            List<Immortal> aliveOpponents = immortalsPopulation.stream()
+                    .filter(im -> im != this && im.getHealth() > 0)
+                    .toList();
 
-            //avoid self-fight
-            if (nextFighterIndex == myIndex) {
-                nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
+            if (aliveOpponents.isEmpty()) {
+                updateCallback.processReport("The winner is " + this);
+                this.interrupt();
             }
 
-            Immortal im = immortalsPopulation.get(nextFighterIndex);
-
-            this.fight(im);
+            Immortal opponent = aliveOpponents.get(r.nextInt(aliveOpponents.size()));
+            this.fight(opponent);
         }, 0, 1, TimeUnit.MILLISECONDS);
     }
 
@@ -55,6 +55,7 @@ public class Immortal extends Thread {
             updateCallback.processReport("Fight: " + this + " vs " + i2 + "\n");
         } else {
             updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+            i2.interrupt();
         }
     }
 

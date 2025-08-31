@@ -114,7 +114,7 @@ public class ControlFrame extends JFrame {
 
             int sum = 0;
             for (Immortal im : immortals) {
-                    sum += im.getHealth();
+                sum += im.getHealth();
             }
 
             statisticsLabel.setText("<html>"+immortals+"<br>Health sum:"+ sum);

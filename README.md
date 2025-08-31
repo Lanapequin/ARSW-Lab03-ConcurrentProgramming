@@ -75,10 +75,16 @@ Con esta aproximación se logró cumplir el invariante del sistema, es decir, qu
 
 Antes del cambio, los métodos getHealth y changeHealth al estar sincronizados de forma anidada podían causar bloqueos, especialmente cuando varios hilos intentaban acceder y modificar la vida simultáneamente. La solución basada en AtomicInteger y el uso de addAndGet() resolvió estos problemas y mejoró la estabilidad y consistencia del juego.
 
-9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
+El programa aún presentaba problemas importantes: no contaba con una condición de finalización clara y resultaba molesto cuando un inmortal intentaba atacar a otro que ya había muerto. Para solucionar esto, se refactorizó el método `run` de la clase Inmortal, de modo que al morir, el hilo correspondiente se interrumpe y finaliza su ejecución. Además, en lugar de seleccionar al azar otro inmortal por índice, ahora se elige entre los hilos que siguen vivos. Cuando solo queda uno, se le declara como ganador.
 
-10. Un elemento molesto para la simulación es que en cierto punto de la misma hay pocos 'inmortales' vivos realizando peleas fallidas con 'inmortales' ya muertos. Es necesario ir suprimiendo los inmortales muertos de la simulación a medida que van muriendo. Para esto:
-	* Analizando el esquema de funcionamiento de la simulación, esto podría crear una condición de carrera? Implemente la funcionalidad, ejecute la simulación y observe qué problema se presenta cuando hay muchos 'inmortales' en la misma. Escriba sus conclusiones al respecto en el archivo RESPUESTAS.txt.
-	* Corrija el problema anterior __SIN hacer uso de sincronización__, pues volver secuencial el acceso a la lista compartida de inmortales haría extremadamente lenta la simulación.
+![run_stream_refactor.png](img/run_stream_refactor.png)
+
+Con esta nueva implementación, se probó el programa y se obtuvo el siguiente resultado, que confirma que la ejecución se detiene correctamente al llegar a un único ganador y que no se realizan ataques a inmortales muertos. También se verificó que los botones de pausa y reanudación funcionan correctamente, lo que representa un éxito en la refactorización.
+
+![proper_program_execution.png](img/proper_program_execution.png)
+
+
+
+9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
 
 11. Para finalizar, implemente la opción STOP.
