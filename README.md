@@ -1,8 +1,4 @@
-
-## Escuela Colombiana de Ingeniería
-### Arquitecturas de Software – ARSW
-
-##### Parte III. – Avance para el martes, antes de clase.
+## Parte III. – Sincronización, Deadlocks y Estabilidad en Sistemas Concurrentes
 
 Este es un juego con N jugadores inmortales, donde cada uno conoce a los demás. Durante la partida, cada jugador ataca constantemente a otro jugador elegido al azar. Cada vez que ataca, le quita M puntos de vida al oponente y suma esos mismos puntos a su propia vida.
 
@@ -83,8 +79,63 @@ Con esta nueva implementación, se probó el programa y se obtuvo el siguiente r
 
 ![proper_program_execution.png](img/proper_program_execution.png)
 
+Con el objetivo de verificar que el invariante del sistema se mantiene tras la refactorización, se realizaron pruebas de ejecución con diferentes cantidades de hilos: 100, 1000 y 10000 inmortales activos. En cada caso, se observó el comportamiento del sistema y se registraron los resultados mediante capturas de pantalla.
 
+**Pruebas con 100 hilos**
+- En esta configuración, el sistema se comportó de forma estable.
+- La suma total de vida se mantuvo constante, cumpliendo el invariante esperado de
+$$
+100 \times 100 = 10000
+$$
+- No se observaron inconsistencias ni bloqueos.
 
-9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
+![hundred_first.png](img/hundred_first.png)
 
-11. Para finalizar, implemente la opción STOP.
+![hundred_second.png](img/hundred_second.png)
+
+![hundred_third.png](img/hundred_third.png)
+
+**Pruebas con 1000 hilos**
+
+- El sistema continuó cumpliendo el invariante de vida total:
+$$
+1000 \times 100 = 100000
+$$
+- Aunque la ejecución fue más lenta, no se detectaron errores de sincronización ni inconsistencias en los valores de vida.
+- Se mantuvo la estabilidad general del programa.
+
+![thousand_first.png](img/thousand_first.png)
+
+![thousand_second.png](img/thousand_second.png)
+
+![thousand_third.png](img/thousand_third.png)
+
+**Pruebas con 10000 hilos**
+- El sistema logró mantener el invariante teórico de:
+$$
+10000 \times 100 = 1000000
+$$
+puntos de vida total.
+
+- Sin embargo, se evidenciaron problemas de rendimiento significativos:
+  - La interfaz se volvió poco responsiva.
+  - La ejecución se prolongó excesivamente.
+  - El sistema mostró signos de saturación de recursos.
+
+![ten_thousand_first.png](img/ten_thousand_first.png)
+
+![ten_thousand_second.png](img/ten_thousand_second.png)
+
+Debido a los problemas de rendimiento observados en la prueba con 10000 hilos, se decidió implementar un botón de "Stop" que permite finalizar la ejecución del programa de forma anticipada. Esta funcionalidad resulta especialmente útil en escenarios de alta carga, donde el sistema puede tardar demasiado en alcanzar una condición de finalización natural.
+
+Con esta mejora, se ofrece al usuario un mayor control sobre la ejecución, evitando bloqueos prolongados y permitiendo interrumpir el juego en cualquier momento sin comprometer la integridad del sistema.
+
+![stop_button.png](img/stop_button.png)
+
+También se implementó una lógica para garantizar que todos los hilos finalicen correctamente cuando sean interrumpidos. Para ello, se modificó el comportamiento del scheduler, de modo que se apague inmediatamente al detectar que ha sido interrumpido.
+
+![run_interruption_refactor.png](img/run_interruption_refactor.png)
+
+Gracias a esta refactorización, el botón Stop ahora interrumpe la ejecución de forma efectiva, deteniendo todos los hilos activos y finalizando el programa sin dejar procesos pendientes.
+
+![stop_execution.png](img/stop_execution.png)

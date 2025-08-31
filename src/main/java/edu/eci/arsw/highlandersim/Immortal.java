@@ -32,6 +32,11 @@ public class Immortal extends Thread {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         scheduler.scheduleAtFixedRate(() -> {
+            if (this.isInterrupted()) {
+                scheduler.shutdown();
+                return;
+            }
+
             isPaused();
 
             List<Immortal> aliveOpponents = immortalsPopulation.stream()
@@ -39,7 +44,6 @@ public class Immortal extends Thread {
                     .toList();
 
             if (aliveOpponents.isEmpty()) {
-                updateCallback.processReport("The winner is " + this);
                 this.interrupt();
             }
 

@@ -75,7 +75,9 @@ public class ControlFrame extends JFrame {
         final JButton btnResume = new JButton("Resume");
         btnResume.addActionListener(e -> {
             for (Immortal im : immortals) {
-                im.unpause();
+                if (!im.isInterrupted()) {
+                    im.unpause();
+                }
             }
         });
         toolBar.add(btnResume);
@@ -84,12 +86,17 @@ public class ControlFrame extends JFrame {
         toolBar.add(lblNumOfImmortals);
 
         numOfImmortals = new JTextField();
-        numOfImmortals.setText("3");
+        numOfImmortals.setText("100");
         toolBar.add(numOfImmortals);
         numOfImmortals.setColumns(10);
 
         JButton btnStop = new JButton("STOP");
         btnStop.setForeground(Color.RED);
+        btnStop.addActionListener(e -> {
+            for (Immortal im : immortals) {
+                im.interrupt();
+            }
+        });
         toolBar.add(btnStop);
 
         scrollPane = new JScrollPane();
@@ -109,7 +116,9 @@ public class ControlFrame extends JFrame {
         JButton btnPauseAndCheck = new JButton("Pause and check");
         btnPauseAndCheck.addActionListener(e -> {
             for (Immortal im : immortals) {
-                im.pause();
+                if (!im.isInterrupted()) {
+                    im.pause();
+                }
             }
 
             int sum = 0;
@@ -125,7 +134,7 @@ public class ControlFrame extends JFrame {
 
     public List<Immortal> setupInmortals() {
 
-        ImmortalUpdateReportCallback ucb=new TextAreaUpdateReportCallback(output,scrollPane);
+        ImmortalUpdateReportCallback ucb = new TextAreaUpdateReportCallback(output,scrollPane);
         
         try {
             int ni = Integer.parseInt(numOfImmortals.getText());
