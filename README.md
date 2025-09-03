@@ -21,6 +21,20 @@ Teniendo en cuenta los conceptos vistos de condición de carrera y sincronizaci�
 - La búsqueda distribuida se detenga (deje de buscar en las listas negras restantes) y retorne la respuesta apenas, en su conjunto, los hilos hayan detectado el número de ocurrencias requerido que determina si un host es confiable o no (_BLACK_LIST_ALARM_COUNT_).
 - Lo anterior, garantizando que no se den condiciones de carrera.
 
+Para darle solucion a esto que nos estan pidiendo, los cambios implementados fueron los siguientes:
+- Se creo una variable compartida entre todos los hilos, de tipo AtomicInteger, la cual permite que múltiples hilos sumen al mismo contador sin producir condiciones de carrera y una bandera de tipo volatile ya que esta nos garantiza que todos los hilos vean su valor actualizado inmediatamente.
+
+![img_7.png](img/img_7.png)
+
+- En la clase IPReputationSearch, cada hilo antes de revisar un servidor pregunta si la bandera esta activa, con el fin de que si esto se cumple, el hilo pare y deje de buscar, ahora, si esto no se ha cumplido, el hilo entra en el ciclo y si encuentra
+una coincidencia la registra en su lista local e incrementa el contador global, si este contador alcanza el limite de BLACK_LIST_ALARM_COUNT, el hilo activa la bandera para que todos los demás hilos dejen de buscar.
+
+![img_8.png](img/img_8.png)
+
+- Como resultado, se observa en terminal que disminuyo el tiempo de ejecucion y ya no se revisan innecesariamente todos los servidores.
+
+![img_6.png](img/img_6.png)
+
 ##### Parte III. – Avance para el martes, antes de clase.
 
 Sincronización y Dead-Locks.
