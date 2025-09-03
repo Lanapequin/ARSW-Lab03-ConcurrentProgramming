@@ -1,99 +1,141 @@
+## Parte III. – Sincronización, Deadlocks y Estabilidad en Sistemas Concurrentes
 
-## Escuela Colombiana de Ingeniería
-### Arquitecturas de Software – ARSW
+Este es un juego con N jugadores inmortales, donde cada uno conoce a los demás. Durante la partida, cada jugador ataca constantemente a otro jugador elegido al azar. Cada vez que ataca, le quita M puntos de vida al oponente y suma esos mismos puntos a su propia vida.
 
+El juego no siempre llega a tener un único ganador. En muchos casos, puede terminar en una situación donde solo quedan dos jugadores atacándose mutuamente, infligiéndose y recuperando exactamente la misma cantidad de vida al mismo ritmo.
 
-#### Ejercicio – programación concurrente, condiciones de carrera y sincronización de hilos. EJERCICIO INDIVIDUAL O EN PAREJAS.
+Cuando ambos jugadores atacan al mismo tiempo, se genera un bucle infinito (deadlock), ya que la cantidad de vida que uno pierde es exactamente la que el otro gana, y viceversa. Esto hace que el sistema entre en un estado estable en el que ningún jugador puede morir, y el programa nunca finaliza.
 
-##### Parte I – Antes de terminar la clase.
+Un invariante del sistema es que la sumatoria total de las vidas de todos los jugadores se mantiene constante en los momentos en que no se están realizando ataques** (es decir, cuando no hay procesos simultáneos de reducción y adición de vida).
 
-Control de hilos con wait/notify. Productor/consumidor.
+Este invariante se expresa como:
 
-1. Revise el funcionamiento del programa y ejecútelo. Mientras esto ocurren, ejecute jVisualVM y revise el consumo de CPU del proceso correspondiente. A qué se debe este consumo?, cual es la clase responsable?
-2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.
-3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
+$$
+n \times 100
+$$
 
+Donde:
 
-##### Parte II. – Antes de terminar la clase.
+- \( n \) es el número de jugadores inmortales.
+- 100 es el valor definido por la constante `DEFAULT_INMORTAL_HEALTH`, que representa la vida inicial de cada jugador.
 
-Teniendo en cuenta los conceptos vistos de condición de carrera y sincronización, haga una nueva versión -más eficiente- del ejercicio anterior (el buscador de listas negras). En la versión actual, cada hilo se encarga de revisar el host en la totalidad del subconjunto de servidores que le corresponde, de manera que en conjunto se están explorando la totalidad de servidores. Teniendo esto en cuenta, haga que:
+En el constructor por defecto de la clase `ControlFrame`, el campo `numOfImmortals` (un objeto `JTextField`) se inicializa con el valor `"3"`, lo que indica que al comenzar el juego siempre hay 3 jugadores inmortales. Por lo tanto, durante la partida, el invariante de la suma total de vida es:
 
-- La búsqueda distribuida se detenga (deje de buscar en las listas negras restantes) y retorne la respuesta apenas, en su conjunto, los hilos hayan detectado el número de ocurrencias requerido que determina si un host es confiable o no (_BLACK_LIST_ALARM_COUNT_).
-- Lo anterior, garantizando que no se den condiciones de carrera.
+$$
+3 \times 100 = 300
+$$
 
-##### Parte III. – Avance para el martes, antes de clase.
+La opción Pause and Check permite visualizar el nombre de cada inmortal junto a su vida actual, así como la sumatoria total de vida en ese momento. Se realizaron cuatro pruebas consecutivas durante la misma ejecución del programa, cuyos resultados se muestran a continuación:
 
-Sincronización y Dead-Locks.
+En esta primera prueba, la sumatoria total de vida fue de 270, lo cual es inferior al valor esperado de 300 (para 3 inmortales con 100 de vida cada uno).
 
-![](http://files.explosm.net/comics/Matt/Bummed-forever.png)
+![first_inmortal_test.png](img/first_inmortal_test.png)
 
-1. Revise el programa “highlander-simulator”, dispuesto en el paquete edu.eci.arsw.highlandersim. Este es un juego en el que:
+En la segunda prueba, la suma total fue de 360, superando el valor invariante esperado.
 
-	* Se tienen N jugadores inmortales.
-	* Cada jugador conoce a los N-1 jugador restantes.
-	* Cada jugador, permanentemente, ataca a algún otro inmortal. El que primero ataca le resta M puntos de vida a su contrincante, y aumenta en esta misma cantidad sus propios puntos de vida.
-	* El juego podría nunca tener un único ganador. Lo más probable es que al final sólo queden dos, peleando indefinidamente quitando y sumando puntos de vida.
+![second_inmortal_test.png](img/second_inmortal_test.png)
 
-2. Revise el código e identifique cómo se implemento la funcionalidad antes indicada. Dada la intención del juego, un invariante debería ser que la sumatoria de los puntos de vida de todos los jugadores siempre sea el mismo(claro está, en un instante de tiempo en el que no esté en proceso una operación de incremento/reducción de tiempo). Para este caso, para N jugadores, cual debería ser este valor?.
+En la tercera captura, la vida total alcanzó los 410, nuevamente por encima del valor correcto.
 
-3. Ejecute la aplicación y verifique cómo funcionan las opción ‘pause and check’. Se cumple el invariante?.
+![third_inmortal_test.png](img/third_inmortal_test.png)
 
-4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
+Finalmente, en la cuarta prueba, la suma descendió a 210, por debajo del invariante.
 
-5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
+![fourth_inmortal_test.png](img/fourth_inmortal_test.png)
 
-6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
+Estos resultados evidencian un claro problema de sincronización en el manejo concurrente de la vida de los inmortales.
 
-	```java
-	synchronized(locka){
-		synchronized(lockb){
-			…
-		}
-	}
-	```
+La razón por la que los resultados no se mostraban correctamente se debía a un problema de sincronización en el manejo concurrente de la vida de los jugadores. Por esta razón, se refactorizó la funcionalidad del botón Pause and Check para que pueda pausar correctamente el hilo, y se añadió un botón de Reanudar para controlar la ejecución.
 
-7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
+Sin embargo, durante la pelea persistían problemas de sincronización. Las regiones críticas donde podían ocurrir condiciones de carrera estaban principalmente en los métodos changeHealth y getHealth. Dado que el campo health es un dato compartido entre varios hilos, la opción de sincronización más adecuada fue cambiar el tipo de dato de health de int a AtomicInteger. Este tipo proporciona métodos atómicos para añadir y obtener valores, facilitando el control concurrente en Java.
 
-8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de _Java Concurrency in Practice_).
+Además, para evitar problemas adicionales, se decidió eliminar el método changeHealth, que cumplía una función similar a un setter. Esto se debe a que la combinación get() -> set() sin sincronización puede provocar inconsistencias por la gestión de la memoria (hash en memoria), especialmente si múltiples hilos acceden simultáneamente.
 
-9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
+En su lugar, se utilizó el método addAndGet() de AtomicInteger para actualizar la vida, permitiendo controlar con precisión cuándo un jugador pierde o gana vida, abarcando así las tres regiones críticas de sincronización.
 
-10. Un elemento molesto para la simulación es que en cierto punto de la misma hay pocos 'inmortales' vivos realizando peleas fallidas con 'inmortales' ya muertos. Es necesario ir suprimiendo los inmortales muertos de la simulación a medida que van muriendo. Para esto:
-	* Analizando el esquema de funcionamiento de la simulación, esto podría crear una condición de carrera? Implemente la funcionalidad, ejecute la simulación y observe qué problema se presenta cuando hay muchos 'inmortales' en la misma. Escriba sus conclusiones al respecto en el archivo RESPUESTAS.txt.
-	* Corrija el problema anterior __SIN hacer uso de sincronización__, pues volver secuencial el acceso a la lista compartida de inmortales haría extremadamente lenta la simulación.
+Se realizaron tres pruebas diferentes para verificar la efectividad del refactor:
 
-11. Para finalizar, implemente la opción STOP.
+Se observa que la sumatoria total de vida se mantiene constante y se cumple el invariante esperado.
 
-<!--
-### Criterios de evaluación
+![first_test_refactor.png](img/first_test_refactor.png)
 
-1. Parte I.
-	* Funcional: La simulación de producción/consumidor se ejecuta eficientemente (sin esperas activas).
+El sistema mantiene la vida correctamente sincronizada, sin valores por encima o por debajo del invariante.
 
-2. Parte II. (Retomando el laboratorio 1)
-	* Se modificó el ejercicio anterior para que los hilos llevaran conjuntamente (compartido) el número de ocurrencias encontradas, y se finalizaran y retornaran el valor en cuanto dicho número de ocurrencias fuera el esperado.
-	* Se garantiza que no se den condiciones de carrera modificando el acceso concurrente al valor compartido (número de ocurrencias).
+![second_test_refactor.png](img/second_test_refactor.png)
 
+Se confirma la estabilidad del sistema sin bloqueos ni inconsistencias en la vida de los jugadores.
 
-2. Parte III.
-	* Diseño:
-		- Coordinación de hilos:
-			* Para pausar la pelea, se debe lograr que el hilo principal induzca a los otros a que se suspendan a sí mismos. Se debe también tener en cuenta que sólo se debe mostrar la sumatoria de los puntos de vida cuando se asegure que todos los hilos han sido suspendidos.
-			* Si para lo anterior se recorre a todo el conjunto de hilos para ver su estado, se evalúa como R, por ser muy ineficiente.
-			* Si para lo anterior los hilos manipulan un contador concurrentemente, pero lo hacen sin tener en cuenta que el incremento de un contador no es una operación atómica -es decir, que puede causar una condición de carrera- , se evalúa como R. En este caso se debería sincronizar el acceso, o usar tipos atómicos como AtomicInteger).
+![third_test_refactor.png](img/third_test_refactor.png)
 
-		- Consistencia ante la concurrencia
-			* Para garantizar la consistencia en la pelea entre dos inmortales, se debe sincronizar el acceso a cualquier otra pelea que involucre a uno, al otro, o a los dos simultáneamente:
-			* En los bloques anidados de sincronización requeridos para lo anterior, se debe garantizar que si los mismos locks son usados en dos peleas simultánemante, éstos será usados en el mismo orden para evitar deadlocks.
-			* En caso de sincronizar el acceso a la pelea con un LOCK común, se evaluará como M, pues esto hace secuencial todas las peleas.
-			* La lista de inmortales debe reducirse en la medida que éstos mueran, pero esta operación debe realizarse SIN sincronización, sino haciendo uso de una colección concurrente (no bloqueante).
+Con esta aproximación se logró cumplir el invariante del sistema, es decir, que la suma total de vida de todos los jugadores se mantiene constante en ausencia de ataques simultáneos. Además, esta implementación evita la necesidad de sincronización anidada para el control de la vida durante la pelea, eliminando posibles deadlocks que antes causaban bloqueos y detenían la ejecución del programa.
 
-	
+Antes del cambio, los métodos getHealth y changeHealth al estar sincronizados de forma anidada podían causar bloqueos, especialmente cuando varios hilos intentaban acceder y modificar la vida simultáneamente. La solución basada en AtomicInteger y el uso de addAndGet() resolvió estos problemas y mejoró la estabilidad y consistencia del juego.
 
-	* Funcionalidad:
-		* Se cumple con el invariante al usar la aplicación con 10, 100 o 1000 hilos.
-		* La aplicación puede reanudar y finalizar(stop) su ejecución.
-		
-		-->
+El programa aún presentaba problemas importantes: no contaba con una condición de finalización clara y resultaba molesto cuando un inmortal intentaba atacar a otro que ya había muerto. Para solucionar esto, se refactorizó el método `run` de la clase Inmortal, de modo que al morir, el hilo correspondiente se interrumpe y finaliza su ejecución. Además, en lugar de seleccionar al azar otro inmortal por índice, ahora se elige entre los hilos que siguen vivos. Cuando solo queda uno, se le declara como ganador.
 
-<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />Este contenido hace parte del curso Arquitecturas de Software del programa de Ingeniería de Sistemas de la Escuela Colombiana de Ingeniería, y está licenciado como <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
+![run_stream_refactor.png](img/run_stream_refactor.png)
+
+Con esta nueva implementación, se probó el programa y se obtuvo el siguiente resultado, que confirma que la ejecución se detiene correctamente al llegar a un único ganador y que no se realizan ataques a inmortales muertos. También se verificó que los botones de pausa y reanudación funcionan correctamente, lo que representa un éxito en la refactorización.
+
+![proper_program_execution.png](img/proper_program_execution.png)
+
+Con el objetivo de verificar que el invariante del sistema se mantiene tras la refactorización, se realizaron pruebas de ejecución con diferentes cantidades de hilos: 100, 1000 y 10000 inmortales activos. En cada caso, se observó el comportamiento del sistema y se registraron los resultados mediante capturas de pantalla.
+
+**Pruebas con 100 hilos**
+- En esta configuración, el sistema se comportó de forma estable.
+- La suma total de vida se mantuvo constante, cumpliendo el invariante esperado de
+$$
+100 \times 100 = 10000
+$$
+- No se observaron inconsistencias ni bloqueos.
+
+![hundred_first.png](img/hundred_first.png)
+
+![hundred_second.png](img/hundred_second.png)
+
+![hundred_third.png](img/hundred_third.png)
+
+**Pruebas con 1000 hilos**
+
+- El sistema continuó cumpliendo el invariante de vida total:
+$$
+1000 \times 100 = 100000
+$$
+- Aunque la ejecución fue más lenta, no se detectaron errores de sincronización ni inconsistencias en los valores de vida.
+- Se mantuvo la estabilidad general del programa.
+
+![thousand_first.png](img/thousand_first.png)
+
+![thousand_second.png](img/thousand_second.png)
+
+![thousand_third.png](img/thousand_third.png)
+
+**Pruebas con 10000 hilos**
+- El sistema logró mantener el invariante teórico de:
+$$
+10000 \times 100 = 1000000
+$$
+puntos de vida total.
+
+- Sin embargo, se evidenciaron problemas de rendimiento significativos:
+  - La interfaz se volvió poco responsiva.
+  - La ejecución se prolongó excesivamente.
+  - El sistema mostró signos de saturación de recursos.
+
+![ten_thousand_first.png](img/ten_thousand_first.png)
+
+![ten_thousand_second.png](img/ten_thousand_second.png)
+
+Debido a los problemas de rendimiento observados en la prueba con 10000 hilos, se decidió implementar un botón de "Stop" que permite finalizar la ejecución del programa de forma anticipada. Esta funcionalidad resulta especialmente útil en escenarios de alta carga, donde el sistema puede tardar demasiado en alcanzar una condición de finalización natural.
+
+Con esta mejora, se ofrece al usuario un mayor control sobre la ejecución, evitando bloqueos prolongados y permitiendo interrumpir el juego en cualquier momento sin comprometer la integridad del sistema.
+
+![stop_button.png](img/stop_button.png)
+
+También se implementó una lógica para garantizar que todos los hilos finalicen correctamente cuando sean interrumpidos. Para ello, se modificó el comportamiento del scheduler, de modo que se apague inmediatamente al detectar que ha sido interrumpido.
+
+![run_interruption_refactor.png](img/run_interruption_refactor.png)
+
+Gracias a esta refactorización, el botón Stop ahora interrumpe la ejecución de forma efectiva, deteniendo todos los hilos activos y finalizando el programa sin dejar procesos pendientes.
+
+![stop_execution.png](img/stop_execution.png)

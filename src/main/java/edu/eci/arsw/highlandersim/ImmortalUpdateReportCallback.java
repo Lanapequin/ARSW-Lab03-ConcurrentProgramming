@@ -11,6 +11,6 @@ package edu.eci.arsw.highlandersim;
  */
 public interface ImmortalUpdateReportCallback {
 
-    public void processReport(String report);
+    void processReport(String report);
     
 }
