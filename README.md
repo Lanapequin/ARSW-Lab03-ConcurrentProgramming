@@ -10,17 +10,36 @@
 Control de hilos con wait/notify. Productor/consumidor.
 
 1. Revise el funcionamiento del programa y ejecútelo. Mientras esto ocurren, ejecute jVisualVM y revise el consumo de CPU del proceso correspondiente. A qué se debe este consumo?, cual es la clase responsable?
+
 ![img.png](img%2Fimg.png)
 ![img_1.png](img%2Fimg_1.png)
-El mayor consumo que se evidencio fue un 30.6% en CPU, con un consumo promedio de 14% y hubieron 17 hilos corriendo, con respecto al heap size en memoria es de 260 MB el pico fue de 31 MB, es un 15.5% de la memoria asignada 
+
+El mayor consumo que se evidencio fue un 30.6% en CPU, con un consumo promedio de 14% y 17 hilos corriendo, con respecto al heap size en memoria es de 260 MB el pico fue de 31 MB, es un 15.5% de la memoria asignada.
+
 2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.
+
 ![img_2.png](img%2Fimg_2.png)
 ![img_3.png](img%2Fimg_3.png)
 ![img_4.png](img%2Fimg_4.png)
 ![img_5.png](img%2Fimg_5.png)
-Consumo promedio de 0.7% en CPU y el maximo fue de 1.8%, el heap size en memoria es de 260 MB y el pico fue de 17 MB
+
+Consumo promedio de 0.7% en CPU y el maximo fue de 1.8%, el heap size en memoria es de 260 MB y el pico fue de 17 MB.
+
 3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
-En el punto anterior, se implemento offer y take, lo cuales con metodos que permiten agregar y eliminar elementos de una cola, sin incurrir en problemas de rango y manejo de hilos sincronizado.
+
+Para hacer que el productor produzca muy rápido, y el consumidor consuma lento, se utilizo scheduleAtFixedRate para crear una tarea periodica y que esta se ejecute cada cierto tiempo.
+
+![img_9.png](img/img_9.png)
+![img_10.png](img/img_10.png)
+
+En el punto anterior, se implemento offer y take, lo cuales son metodos que permiten agregar y eliminar elementos de una cola, sin incurrir en problemas de rango y manejo de hilos sincronizado.
+
+Se puso un limite de 10 para el stock y se verifico con jVisualVM que no hubiera un consumo alto de CPU ni errores.
+
+![img_11.png](img/img_11.png)
+![img_12.png](img/img_12.png)
+
+El consumo promedio fue de 0.2% en CPU y el maximo fue de 0.6%, el heap size en memoria es de 234 MB y el pico fue de 13 MB.
 
 ##### Parte II. – Antes de terminar la clase.
 
